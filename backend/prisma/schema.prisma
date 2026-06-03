@@ -183,3 +183,127 @@ model RolePermission {
   @@index([createdById])
   @@index([updatedById])
 }
+
+
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  tokenHash   String
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("RefreshTokenCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("RefreshTokenUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String
+  entity      String?
+  entityType  String?
+  entityId    String?
+  oldValue    Json?    @map("old_value")
+  newValue    Json?    @map("new_value")
+  ip          String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  meta        Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("AuditLogCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("AuditLogUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  userId    String
+  type      String             @default("general")
+  title     String
+  message   String
+  isRead    Boolean            @default(false) @map("is_read")
+  status    NotificationStatus @default(UNREAD)
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  readAt    DateTime?
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("NotificationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("NotificationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Setting {
+  id          String   @id @default(uuid())
+  userId      String?
+  key         String
+  value       String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("SettingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("SettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model File {
+  id          String         @id @default(uuid())
+  userId      String?
+  entity      String?
+  entityId    String?        @map("entity_id")
+  filename    String
+  filePath    String?        @map("file_path")
+  fileSize    Int?           @map("file_size")
+  mimeType    String
+  sizeBytes   Int
+  storageKey  String         @unique
+  uploadedBy  String?        @map("uploaded_by")
+  visibility  FileVisibility @default(PRIVATE)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("FileCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("FileUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+
