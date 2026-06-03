@@ -485,3 +485,139 @@ model CartItem {
   @@index([createdById])
   @@index([updatedById])
 }
+
+
+model ShippingMethod {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  priceCents Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("ShippingMethodCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("ShippingMethodUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  orders Order[]
+
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Discount {
+  id             String    @id @default(uuid())
+  code           String    @unique
+  percentOff     Int?
+  amountOffCents Int?
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("DiscountCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("DiscountUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  orders Order[]
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  customerId       String
+  addressId        String?
+  shippingMethodId String?
+  discountId       String?
+  status           OrderStatus @default(PENDING)
+  subtotalCents    Int         @default(0)
+  shippingCents    Int         @default(0)
+  discountCents    Int         @default(0)
+  totalCents       Int         @default(0)
+  isSeen           Boolean     @default(false) @map("is_seen")
+  seenAt           DateTime?   @map("seen_at")
+  seenBy           String?     @map("seen_by")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("OrderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  customer       Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  address        Address?        @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  shippingMethod ShippingMethod? @relation(fields: [shippingMethodId], references: [id], onDelete: SetNull)
+  discount       Discount?       @relation(fields: [discountId], references: [id], onDelete: SetNull)
+
+  items         OrderItem[]
+  payments      Payment[]
+  statusHistory OrderStatusHistory[]
+
+  @@index([customerId, createdAt])
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  unitPriceCents Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("OrderItemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("OrderItemUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  orderId     String
+  provider    String
+  status      String
+  amountCents Int
+  externalRef String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("PaymentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("PaymentUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("OrderStatusHistoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("OrderStatusHistoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@index([createdById])
+  @@index([updatedById])
+}
