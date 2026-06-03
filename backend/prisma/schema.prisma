@@ -24,3 +24,81 @@ enum OrderStatus {
   COMPLETED
   CANCELLED
 }
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  fullName     String       @map("full_name")
+  firstName    String?      @map("first_name")
+  lastName     String?      @map("last_name")
+  phone        String?
+  isActive     Boolean      @default(true) @map("is_active")
+  status       UserStatus   @default(ACTIVE)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  createdById  String?      @map("created_by")
+  updatedById  String?      @map("updated_by")
+  createdBy    User?        @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    User?        @relation("UserUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  createdUsers User[]       @relation("UserCreatedBy")
+  updatedUsers User[]       @relation("UserUpdatedBy")
+
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+  settings      Setting[]
+  files         File[]
+
+  rolesCreated               Role[]               @relation("RoleCreatedBy")
+  rolesUpdated               Role[]               @relation("RoleUpdatedBy")
+  permissionsCreated         Permission[]         @relation("PermissionCreatedBy")
+  permissionsUpdated         Permission[]         @relation("PermissionUpdatedBy")
+  userRolesCreated           UserRole[]           @relation("UserRoleCreatedBy")
+  userRolesUpdated           UserRole[]           @relation("UserRoleUpdatedBy")
+  rolePermissionsCreated     RolePermission[]     @relation("RolePermissionCreatedBy")
+  rolePermissionsUpdated     RolePermission[]     @relation("RolePermissionUpdatedBy")
+  refreshTokensCreated       RefreshToken[]       @relation("RefreshTokenCreatedBy")
+  refreshTokensUpdated       RefreshToken[]       @relation("RefreshTokenUpdatedBy")
+  auditLogsCreated           AuditLog[]           @relation("AuditLogCreatedBy")
+  auditLogsUpdated           AuditLog[]           @relation("AuditLogUpdatedBy")
+  notificationsCreated       Notification[]       @relation("NotificationCreatedBy")
+  notificationsUpdated       Notification[]       @relation("NotificationUpdatedBy")
+  settingsCreated            Setting[]            @relation("SettingCreatedBy")
+  settingsUpdated            Setting[]            @relation("SettingUpdatedBy")
+  filesCreated               File[]               @relation("FileCreatedBy")
+  filesUpdated               File[]               @relation("FileUpdatedBy")
+  productCategoriesCreated   ProductCategory[]    @relation("ProductCategoryCreatedBy")
+  productCategoriesUpdated   ProductCategory[]    @relation("ProductCategoryUpdatedBy")
+  productImagesCreated       ProductImage[]       @relation("ProductImageCreatedBy")
+  productImagesUpdated       ProductImage[]       @relation("ProductImageUpdatedBy")
+  inventoriesCreated         Inventory[]          @relation("InventoryCreatedBy")
+  inventoriesUpdated         Inventory[]          @relation("InventoryUpdatedBy")
+  addressesCreated           Address[]            @relation("AddressCreatedBy")
+  addressesUpdated           Address[]            @relation("AddressUpdatedBy")
+  cartsCreated               Cart[]               @relation("CartCreatedBy")
+  cartsUpdated               Cart[]               @relation("CartUpdatedBy")
+  cartItemsCreated           CartItem[]           @relation("CartItemCreatedBy")
+  cartItemsUpdated           CartItem[]           @relation("CartItemUpdatedBy")
+  shippingMethodsCreated     ShippingMethod[]     @relation("ShippingMethodCreatedBy")
+  shippingMethodsUpdated     ShippingMethod[]     @relation("ShippingMethodUpdatedBy")
+  orderItemsCreated          OrderItem[]          @relation("OrderItemCreatedBy")
+  orderItemsUpdated          OrderItem[]          @relation("OrderItemUpdatedBy")
+  paymentsCreated            Payment[]            @relation("PaymentCreatedBy")
+  paymentsUpdated            Payment[]            @relation("PaymentUpdatedBy")
+  orderStatusHistoriesCreated OrderStatusHistory[] @relation("OrderStatusHistoryCreatedBy")
+  orderStatusHistoriesUpdated OrderStatusHistory[] @relation("OrderStatusHistoryUpdatedBy")
+
+  productsCreated   Product[]  @relation("ProductCreatedBy")
+  productsUpdated   Product[]  @relation("ProductUpdatedBy")
+  ordersCreated     Order[]    @relation("OrderCreatedBy")
+  ordersUpdated     Order[]    @relation("OrderUpdatedBy")
+  categoriesCreated Category[] @relation("CategoryCreatedBy")
+  categoriesUpdated Category[] @relation("CategoryUpdatedBy")
+  customersCreated  Customer[] @relation("CustomerCreatedBy")
+  customersUpdated  Customer[] @relation("CustomerUpdatedBy")
+  discountsCreated  Discount[] @relation("DiscountCreatedBy")
+  discountsUpdated  Discount[] @relation("DiscountUpdatedBy")
+}
