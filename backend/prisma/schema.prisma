@@ -102,3 +102,84 @@ model User {
   discountsCreated  Discount[] @relation("DiscountCreatedBy")
   discountsUpdated  Discount[] @relation("DiscountUpdatedBy")
 }
+
+
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  createdById String?          @map("created_by")
+  updatedById String?          @map("updated_by")
+  createdBy   User?            @relation("RoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?            @relation("RoleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique
+  name        String?
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  createdById String?          @map("created_by")
+  updatedById String?          @map("updated_by")
+  createdBy   User?            @relation("PermissionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?            @relation("PermissionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  roles       RolePermission[]
+
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model UserRole {
+  id          String   @id @default(uuid())
+  userId      String
+  roleId      String
+  assignedAt  DateTime @default(now()) @map("assigned_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("UserRoleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("UserRoleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  createdById  String?  @map("created_by")
+  updatedById  String?  @map("updated_by")
+  createdBy    User?    @relation("RolePermissionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    User?    @relation("RolePermissionUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([createdById])
+  @@index([updatedById])
+}
