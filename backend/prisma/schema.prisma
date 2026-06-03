@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+enum FileVisibility {
+  PRIVATE
+  PUBLIC
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
