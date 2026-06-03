@@ -621,3 +621,43 @@ model OrderStatusHistory {
   @@index([createdById])
   @@index([updatedById])
 }
+
+
+model SupportSession {
+  id             String    @id @default(uuid())
+  customerUserId String?
+  customerEmail  String?
+  customerName   String
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  createdById    String?   @map("created_by")
+  updatedById    String?   @map("updated_by")
+
+  messages SupportMessage[]
+
+  @@index([customerUserId])
+  @@index([customerEmail])
+}
+
+model SupportMessage {
+  id          String    @id @default(uuid())
+  sessionId   String
+  from        String
+  senderName  String
+  text        String
+  messageType String    @default("normal") @map("message_type")
+  isRead      Boolean   @default(false) @map("is_read")
+  readAt      DateTime? @map("read_at")
+  readBy      String?   @map("read_by")
+  status      String    @default("unread")
+  isReplied   Boolean   @default(false) @map("is_replied")
+  repliedAt   DateTime? @map("replied_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdById String?   @map("created_by")
+  updatedById String?   @map("updated_by")
+
+  session SupportSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
