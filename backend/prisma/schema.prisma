@@ -402,3 +402,86 @@ model Inventory {
   @@index([createdById])
   @@index([updatedById])
 }
+
+
+model Customer {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  fullName  String
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("CustomerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("CustomerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  addresses Address[]
+  carts     Cart[]
+  orders    Order[]
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  customerId String
+  line1      String
+  line2      String?
+  city       String
+  postalCode String?
+  country    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("AddressCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("AddressUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@index([customerId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Cart {
+  id         String   @id @default(uuid())
+  customerId String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("CartCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("CartUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    CartItem[]
+
+  @@index([customerId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model CartItem {
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("CartItemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("CartItemUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@id([cartId, productId])
+  @@index([createdById])
+  @@index([updatedById])
+}
