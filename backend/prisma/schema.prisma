@@ -307,3 +307,98 @@ model File {
 }
 
 
+// produkte dhe porosit 
+
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("CategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("CategoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  products ProductCategory[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  sku         String   @unique
+  name        String
+  description String?
+  priceCents  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("ProductUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  categories ProductCategory[]
+  images     ProductImage[]
+  inventory  Inventory?
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("ProductCategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("ProductCategoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("ProductImageCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("ProductImageUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model Inventory {
+  productId   String   @id
+  quantity    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdById String? @map("created_by")
+  updatedById String? @map("updated_by")
+  createdBy   User?   @relation("InventoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?   @relation("InventoryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([updatedById])
+}
