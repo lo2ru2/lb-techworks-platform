@@ -1,0 +1,49 @@
+.lb-toast-host {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.lb-toast {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  animation: lb-toast-in 0.2s ease-out;
+}
+
+.lb-toast strong {
+  font-size: 0.9rem;
+}
+
+.lb-toast span {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+@keyframes lb-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
