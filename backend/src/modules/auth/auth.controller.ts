@@ -1,81 +1,74 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { requestClientMeta } from '../../common/request-meta';
+import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../../common/rate-limit/rate-limit.guard';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { RefreshDto } from './dto/refresh.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh.dto';
+import { RegisterDto } from './dto/register.dto';
 
-interface RequestWithUser {
-  user: { id: string; email: string; roles: string[]; permissions: string[] };
-}
-
-interface GoogleUser {
-  email: string;
-  firstName: string;
-  lastName: string;
-}
-
-@ApiTags('Auth')
+@ApiTags('auth')
 @Controller('auth')
+@UseGuards(RateLimitGuard)
+@RateLimit(40, 60)
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly auth: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  @RateLimit(15, 3600)
+  async register(@Body() dto: RegisterDto, @Req() req: Request) {
+    return this.auth.register(
+      dto.email,
+      dto.password,
+      dto.firstName,
+      dto.lastName,
+      requestClientMeta(req),
+      dto.phone,
+    );
   }
 
   @Post('login')
-  @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
-  }
-
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  refresh(@Body() dto: RefreshDto) {
-    return this.authService.refresh(dto);
-  }
-
-  @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  logout(@Req() req: RequestWithUser) {
-    return this.authService.logout(req.user.id);
+  @RateLimit(30, 300)
+  async login(@Body() dto: LoginDto, @Req() req: Request) {
+    return this.auth.login(dto.email, dto.password, requestClientMeta(req));
   }
 
   @Post('change-password')
-  @HttpCode(HttpStatus.OK)
-  changePassword(@Body() dto: ChangePasswordDto) {
-    return this.authService.changePassword(dto);
+  @RateLimit(20, 600)
+  async changePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
+    return this.auth.changePassword(dto.email, dto.currentPassword, dto.newPassword, requestClientMeta(req));
   }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  googleAuth() {}
+  async googleAuth() {
+    return { ok: true };
+  }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleCallback(@Req() req: { user: GoogleUser }) {
-    return this.authService.googleLogin(req.user);
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const session = req.user as
+      | { accessToken: string; user: { id: string; email: string; fullName: string }; roles: string[] }
+      | undefined;
+    if (!session?.accessToken || !session.user) {
+      return res.redirect('http://localhost:5173/login?error=google_auth_failed');
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL?.trim() || 'http://localhost:5173';
+    const encodedUser = encodeURIComponent(JSON.stringify(session.user));
+    const encodedRoles = encodeURIComponent(JSON.stringify(session.roles ?? []));
+    const redirectUrl = `${frontendUrl.replace(/\/$/, '')}/auth/google/success?token=${encodeURIComponent(session.accessToken)}&user=${encodedUser}&roles=${encodedRoles}`;
+    return res.redirect(redirectUrl);
   }
 
-  @Get('me')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  me(@Req() req: RequestWithUser) {
-    return req.user;
+  @Post('refresh')
+  async refresh(@Body() body: RefreshTokenDto) {
+    return this.auth.refresh(body.refreshToken);
   }
 }
+

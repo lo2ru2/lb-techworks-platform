@@ -7,6 +7,7 @@ import { API_BASE } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import './DetajetPage.css';
 
+/** Checkout + Stripe Checkout (faqja e hostuar e Stripe për pagesë me kartë). */
 export function DetajetPage() {
   const navigate  = useNavigate();
   const userProfile = useAuthStore((s) => s.userProfile);
@@ -19,7 +20,7 @@ export function DetajetPage() {
   const [checkoutError, setCheckoutError] = useState('');
   const [loading, setLoading]         = useState(false);
 
-  
+  // Parafusho të dhënat e klientit të kyçur
   useEffect(() => {
     if (userProfile) {
       setFullName((prev) => prev || userProfile.fullName || '');

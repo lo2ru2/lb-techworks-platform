@@ -1,3 +1,7 @@
+/* Kopje (me adaptim) e `LB-Techworks/style.css` per pamje 1:1 ne React.
+   Shenim: Kjo file eshte e gjate sepse ruan dizajnin ekzistues.
+*/
+
 @import url("https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap");
 * {
   margin: 0;
@@ -221,7 +225,7 @@ body {
   font-size: 15px;
 }
 
-
+/* Product cards (nga shembulli) */
 #product1 {
   text-align: center;
 }
@@ -434,7 +438,7 @@ footer .copyright {
   text-align: center;
 }
 
-/* Blog */
+/* Blog (nga shembulli) */
 #blog {
   padding: 150px 150px 0 150px;
 }
@@ -465,7 +469,7 @@ footer .copyright {
   margin: 0;
 }
 
-/* Contact */
+/* Contact (nga shembulli) */
 #contact-detail {
   display: flex;
   align-items: center;
@@ -751,7 +755,7 @@ footer .copyright {
   box-shadow: 0 5px 15px rgba(8, 129, 120, 0.2);
 }
 
-/* Cart popup */
+/* Cart popup (nga shembulli) */
 .cart-popup {
   display: none;
   position: fixed;
@@ -914,7 +918,7 @@ footer .copyright {
   color: #fff;
 }
 
-/* Responsive */
+/* Responsive (kritike) */
 @media (max-width: 799px) {
   #navbar {
     display: flex;
@@ -1014,6 +1018,7 @@ footer .copyright {
   }
 }
 
+/* --- Restored UI overrides --- */
 .lb-about-img {
   width: 48%;
   max-width: 520px;

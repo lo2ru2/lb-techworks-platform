@@ -1,55 +1,80 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import {
+  parseExportFormat,
+  rowsToCsv,
+  rowsToJson,
+  rowsToXlsxBuffer,
+  type ExportFormat,
+} from '../../common/export/export-formats';
 import { UsersRepository } from './users.repository';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private usersRepo: UsersRepository,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private readonly usersRepo: UsersRepository) {}
 
-  async findAll(page = 1, limit = 20) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      this.usersRepo.findAll(skip, limit),
-      this.usersRepo.count(),
-    ]);
-    return { data, total, page, limit, pages: Math.ceil(total / limit) };
+  async me(userId: string) {
+    return this.usersRepo.me(userId);
   }
 
-  async findOne(id: string) {
-    const user = await this.usersRepo.findById(id);
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+  async listAdmin(q?: string) {
+    return this.usersRepo.listAdmin({ q });
   }
 
-  async update(id: string, dto: { firstName?: string; lastName?: string; isActive?: boolean }) {
-    await this.findOne(id);
-    const fullName =
-      dto.firstName || dto.lastName
-        ? `${dto.firstName ?? ''} ${dto.lastName ?? ''}`.trim()
-        : undefined;
-    return this.usersRepo.update(id, { ...dto, fullName });
+  async updateMe(userId: string, payload: { firstName?: string; lastName?: string; fullName?: string; phone?: string | null; email?: string }) {
+    return this.usersRepo.updateMe(userId, payload);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
-    await this.usersRepo.softDelete(id);
-    return { message: 'User deactivated' };
+  async changePassword(userId: string, oldPassword: string, newPassword: string) {
+    const user = await this.usersRepo.findByIdWithPassword(userId);
+    if (!user) throw new BadRequestException('Përdoruesi nuk u gjet');
+    const ok = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!ok) throw new BadRequestException('Fjalëkalimi aktual është gabim');
+    const hash = await bcrypt.hash(newPassword, 10);
+    await this.usersRepo.updatePassword(userId, hash);
+    return { ok: true };
   }
 
-  async assignRole(userId: string, roleName: string) {
-    const role = await this.prisma.role.findUnique({ where: { name: roleName } });
-    if (!role) throw new NotFoundException(`Role "${roleName}" not found`);
-    await this.usersRepo.assignRole(userId, role.id);
-    return { message: `Role ${roleName} assigned` };
+  private encodeExport(format: ExportFormat, rows: Record<string, unknown>[], base: string) {
+    if (format === 'json') {
+      return {
+        contentType: 'application/json; charset=utf-8',
+        filename: `${base}.json`,
+        body: rowsToJson(rows),
+      };
+    }
+    if (format === 'xlsx') {
+      return {
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        filename: `${base}.xlsx`,
+        body: rowsToXlsxBuffer(rows, base),
+      };
+    }
+    return {
+      contentType: 'text/csv; charset=utf-8',
+      filename: `${base}.csv`,
+      body: rowsToCsv(rows),
+    };
   }
 
-  async removeRole(userId: string, roleName: string) {
-    const role = await this.prisma.role.findUnique({ where: { name: roleName } });
-    if (!role) throw new NotFoundException(`Role "${roleName}" not found`);
-    await this.usersRepo.removeRole(userId, role.id);
-    return { message: `Role ${roleName} removed` };
+  async exportAdmin(formatRaw: string | undefined, q?: string) {
+    const format = parseExportFormat(formatRaw);
+    const users = await this.listAdmin(q);
+    const rows = users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      firstName: u.firstName ?? '',
+      lastName: u.lastName ?? '',
+      fullName: u.fullName,
+      phone: u.phone ?? '',
+      isActive: u.isActive,
+      status: u.status,
+      roles: u.roles.map((r) => r.role.name).join(';'),
+      createdAt: u.createdAt.toISOString(),
+      updatedAt: u.updatedAt.toISOString(),
+    })) as Record<string, unknown>[];
+    return this.encodeExport(format, rows, 'users');
   }
 }
+

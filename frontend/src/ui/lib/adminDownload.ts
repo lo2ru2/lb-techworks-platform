@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_BASE, authHeaders } from './api';
 
-
+/** Shkarkim me Bearer (export CSV/JSON/XLSX). */
 export async function adminDownloadFile(pathWithQuery: string, filename: string) {
   const url = pathWithQuery.startsWith('http') ? pathWithQuery : `${API_BASE}${pathWithQuery}`;
   const res = await axios.get(url, {

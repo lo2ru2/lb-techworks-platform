@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-
+/** Lexon mesazhin nga përgjigjet NestJS / class-validator. */
 export function parseApiError(e: unknown, fallback = 'Kërkesa dështoi. Provo përsëri.'): string {
   if (axios.isAxiosError(e)) {
     if (e.code === 'ERR_NETWORK' || e.code === 'ECONNREFUSED' || !e.response) {

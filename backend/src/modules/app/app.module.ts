@@ -25,6 +25,8 @@ import { AnalyticsModule } from '../analytics/analytics.module';
         join(__dirname, '..', '..', '..', '.env'),
       ],
     }),
+    // MongoDB — NoSQL for analytics (product views, search queries)
+    // connectionFactory allows the app to start even when MongoDB is temporarily unavailable
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

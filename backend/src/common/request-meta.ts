@@ -1,5 +1,6 @@
 import { Request } from 'express';
 
+/** Meta për audit: User-Agent në Express mund të jetë string | string[] — Prisma pret string. */
 export function requestClientMeta(req: Request): { ip?: string; userAgent?: string } {
   const rawUa = req.headers['user-agent'];
   const userAgent =

@@ -36,7 +36,7 @@ export class OrdersService {
     config: ConfigService,
   ) {
     const secret = config.get<string>('STRIPE_SECRET_KEY')?.trim();
-    this.stripe = secret ? new Stripe(secret, { apiVersion: '2026-04-22.dahlia' }) : null;
+    this.stripe = secret ? new Stripe(secret, { apiVersion: '2026-05-27.dahlia' }) : null;
     this.frontendBaseUrl = (config.get<string>('FRONTEND_URL') ?? 'http://localhost:5173').replace(/\/$/, '');
   }
 

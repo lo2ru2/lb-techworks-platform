@@ -2,8 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import cookieParser from 'cookie-parser';
-import express from 'express';
+import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -17,12 +17,17 @@ async function bootstrap() {
   const config = app.get(ConfigService);
   const corsOrigin = config.get<string>('BACKEND_CORS_ORIGIN') ?? 'http://localhost:5173';
 
+  // `nest build` → `dist/src/main.js`, pra __dirname = `backend/dist/src`. 4× `..` = prindi i monorepos (`.../LB-Techworks` + `lb-techworks-platform`), pastaj `LB-Techworks` = vëllai me `img/`.
   const legacyRoot =
     config.get<string>('LEGACY_ASSETS_ROOT')?.trim() ||
     join(__dirname, '..', '..', '..', '..', 'LB-Techworks');
   app.use('/shop-assets', express.static(legacyRoot));
 
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(cookieParser());
 
   app.enableCors({

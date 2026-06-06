@@ -1,44 +1,22 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
-interface JwtPayload {
-  sub: string;
-  email: string;
-  roles: string[];
-  permissions: string[];
-}
+type JwtPayload = { sub: string; email: string; perms: string[] };
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    config: ConfigService,
-    private prisma: PrismaService,
-  ) {
+  constructor(config: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get<string>('JWT_SECRET') ?? 'changeme',
+      secretOrKey: config.get<string>('JWT_ACCESS_SECRET') ?? 'change-me-access',
     });
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-      select: { id: true, email: true, isActive: true, status: true },
-    });
-
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Account disabled');
-    }
-
-    return {
-      id: user.id,
-      email: user.email,
-      roles: payload.roles,
-      permissions: payload.permissions,
-    };
+    return { userId: payload.sub, email: payload.email, perms: payload.perms ?? [] };
   }
 }
+

@@ -24,7 +24,7 @@ export function AdminCategoriesPage() {
 
   useEffect(() => {
     load();
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function exportFmt(fmt: 'csv' | 'json' | 'xlsx') {

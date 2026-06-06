@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { RedisService } from '../cache/redis.service';
@@ -30,7 +36,9 @@ export class RateLimitGuard implements CanActivate {
     const key = `rl:${context.getClass().name}:${context.getHandler().name}:${ip}`;
 
     const ok = await this.redis.checkRateLimit(key, opts.windowSec, opts.limit);
-    if (!ok) throw new HttpException('Shumë kërkesa. Provo përsëri më vonë.', HttpStatus.TOO_MANY_REQUESTS);
+    if (!ok) {
+      throw new HttpException('Shumë kërkesa. Provo përsëri më vonë.', HttpStatus.TOO_MANY_REQUESTS);
+    }
     return true;
   }
 }

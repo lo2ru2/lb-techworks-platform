@@ -2,16 +2,12 @@
   "name": "lb-techworks-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend API (NestJS + Prisma) per LB-Techworks Platform",
+  "type": "commonjs",
+
   "scripts": {
     "start:dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev --name chore_schema_update",
-    "prisma:status": "prisma migrate status",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio",
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
   },
   "dependencies": {
@@ -45,7 +41,6 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
-    "@nestjs/testing": "^11.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.8",
     "@types/node": "^22.0.0",

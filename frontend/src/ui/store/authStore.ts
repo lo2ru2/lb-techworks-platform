@@ -10,14 +10,14 @@ export type UserProfile = {
 };
 
 type AuthState = {
-  
+  // Customer auth
   userToken: string | null;
   userProfile: UserProfile | null;
-  
+  // Admin auth
   adminToken: string | null;
   adminUser: UserProfile | null;
 
-  
+  // Actions
   loginUser: (token: string, profile: UserProfile) => void;
   loginAdmin: (token: string, profile: UserProfile) => void;
   logoutUser: () => void;

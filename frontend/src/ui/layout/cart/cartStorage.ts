@@ -12,6 +12,19 @@ export type CartItem = {
 
 let memoryCart: CartItem[] = [];
 
+const GUEST_CART_KEY = 'lb:guest:cart';
+
+function loadGuestCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(GUEST_CART_KEY);
+    return raw ? normalize(JSON.parse(raw)) : [];
+  } catch { return []; }
+}
+
+function saveGuestCart(items: CartItem[]) {
+  localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+}
+
 function emitCartChanged(items: CartItem[], source: 'add' | 'update' | 'write') {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(
@@ -65,6 +78,7 @@ export function readCart(): CartItem[] {
 
 export function writeCart(items: CartItem[]) {
   memoryCart = normalize(items);
+  if (!hasUserSession()) saveGuestCart(memoryCart);
   emitCartChanged(memoryCart, 'write');
   void pushCartToServer(memoryCart);
 }
@@ -75,6 +89,7 @@ export function addToCart(item: Omit<CartItem, 'quantity'>, qty = 1) {
   if (existing) existing.quantity += Math.max(1, qty);
   else cart.push({ ...item, quantity: Math.max(1, qty) });
   memoryCart = normalize(cart);
+  if (!hasUserSession()) saveGuestCart(memoryCart);
   void pushCartToServer(memoryCart);
   emitCartChanged(cart, 'add');
   return cart;
@@ -87,6 +102,7 @@ export function updateQuantity(id: string, qty: number) {
   if (qty <= 0) cart.splice(idx, 1);
   else cart[idx].quantity = qty;
   memoryCart = normalize(cart);
+  if (!hasUserSession()) saveGuestCart(memoryCart);
   void pushCartToServer(memoryCart);
   emitCartChanged(memoryCart, 'update');
   return memoryCart;
@@ -94,7 +110,7 @@ export function updateQuantity(id: string, qty: number) {
 
 export async function hydrateCartForSession() {
   if (!hasUserSession()) {
-    memoryCart = [];
+    memoryCart = loadGuestCart();
     emitCartChanged(memoryCart, 'write');
     return;
   }
@@ -117,4 +133,3 @@ export async function hydrateCartForSession() {
     emitCartChanged(memoryCart, 'write');
   }
 }
-

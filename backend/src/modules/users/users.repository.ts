@@ -1,73 +1,96 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll(skip: number, take: number) {
-    return this.prisma.user.findMany({
-      skip,
-      take,
-      orderBy: { createdAt: 'desc' },
+  me(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         email: true,
         fullName: true,
         firstName: true,
         lastName: true,
+        phone: true,
         isActive: true,
         status: true,
         createdAt: true,
-        userRoles: { include: { role: true } },
       },
     });
   }
 
-  count() {
-    return this.prisma.user.count();
-  }
-
-  findById(id: string) {
-    return this.prisma.user.findUnique({
-      where: { id },
+  listAdmin(opts: { q?: string }) {
+    const where: Prisma.UserWhereInput = {};
+    if (opts.q?.trim()) {
+      const t = opts.q.trim();
+      where.OR = [
+        { email: { contains: t, mode: 'insensitive' } },
+        { fullName: { contains: t, mode: 'insensitive' } },
+        { firstName: { contains: t, mode: 'insensitive' } },
+        { lastName: { contains: t, mode: 'insensitive' } },
+      ];
+    }
+    return this.prisma.user.findMany({
+      where,
       select: {
         id: true,
         email: true,
         fullName: true,
         firstName: true,
         lastName: true,
+        phone: true,
         isActive: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        userRoles: { include: { role: true } },
+        roles: { include: { role: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 2000,
+    });
+  }
+
+  findByIdWithPassword(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, passwordHash: true },
+    });
+  }
+
+  updateMe(userId: string, data: { firstName?: string; lastName?: string; fullName?: string; phone?: string | null; email?: string }) {
+    const update: Prisma.UserUpdateInput = {};
+    if (data.firstName !== undefined) {
+      update.firstName = data.firstName;
+      update.lastName  = data.lastName ?? undefined;
+      update.fullName  = data.fullName ?? `${data.firstName} ${data.lastName ?? ''}`.trim();
+    }
+    if (data.phone !== undefined) update.phone = data.phone;
+    if (data.email !== undefined) update.email = data.email;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: update,
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        isActive: true,
+        status: true,
+        createdAt: true,
       },
     });
   }
 
-  update(id: string, data: { firstName?: string; lastName?: string; fullName?: string; isActive?: boolean }) {
-    return this.prisma.user.update({ where: { id }, data });
-  }
-
-  softDelete(id: string) {
+  updatePassword(userId: string, passwordHash: string) {
     return this.prisma.user.update({
-      where: { id },
-      data: { isActive: false },
-    });
-  }
-
-  assignRole(userId: string, roleId: string) {
-    return this.prisma.userRole.upsert({
-      where: { userId_roleId: { userId, roleId } },
-      create: { userId, roleId },
-      update: {},
-    });
-  }
-
-  removeRole(userId: string, roleId: string) {
-    return this.prisma.userRole.delete({
-      where: { userId_roleId: { userId, roleId } },
+      where: { id: userId },
+      data: { passwordHash },
     });
   }
 }

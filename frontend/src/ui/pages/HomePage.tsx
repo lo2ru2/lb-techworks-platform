@@ -21,6 +21,7 @@ const fallbackNew: Card[] = [
   { id: 'n4', cat: 'Telefona', name: 'Samsung Galaxy Flip 6', price: 1200, image: legacyAsset('img/telefonat/73.png'), stock: 0 },
 ];
 
+/** Strukturë 1:1 me `index.html`; produktet nga API kur backend punon (ID reale për checkout). */
 export function HomePage() {
   const [bestsellers, setBestsellers] = useState<Card[]>(fallbackBestsellers);
   const [newArrivals, setNewArrivals] = useState<Card[]>(fallbackNew);
@@ -52,7 +53,7 @@ export function HomePage() {
         setNewArrivals(rest.length >= 4 ? rest.map(mapItem) : items.slice(0, 4).map(mapItem));
       })
       .catch(() => {
-        
+        /* mbaj fallback */
       });
   }, []);
 

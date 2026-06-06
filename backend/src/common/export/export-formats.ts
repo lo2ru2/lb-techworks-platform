@@ -3,8 +3,9 @@ import * as XLSX from 'xlsx';
 export type ExportFormat = 'csv' | 'json' | 'xlsx';
 
 function csvEscape(value: string) {
-  if (value.includes('"') || value.includes(',') || value.includes('\n'))
+  if (value.includes('"') || value.includes(',') || value.includes('\n')) {
     return `"${value.replaceAll('"', '""')}"`;
+  }
   return value;
 }
 
@@ -12,7 +13,9 @@ export function rowsToCsv(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return '\n';
   const keys = Object.keys(rows[0]);
   const header = keys.join(',');
-  const lines = rows.map((r) => keys.map((k) => csvEscape(String(r[k] ?? ''))).join(','));
+  const lines = rows.map((r) =>
+    keys.map((k) => csvEscape(String(r[k] ?? ''))).join(','),
+  );
   return [header, ...lines].join('\n') + '\n';
 }
 

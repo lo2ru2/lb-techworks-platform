@@ -14,7 +14,10 @@ export class RedisService implements OnModuleDestroy {
       maxRetriesPerRequest: 1,
       enableOfflineQueue: false,
     });
-    this.redis.on('error', () => {});
+
+    this.redis.on('error', () => {
+      // Keep app alive even when Redis is temporarily down.
+    });
   }
 
   private async safe<T>(cb: () => Promise<T>, fallback: T): Promise<T> {
@@ -45,11 +48,17 @@ export class RedisService implements OnModuleDestroy {
     await this.safe(async () => {
       const stream = this.redis.scanStream({ match: `${prefix}*`, count: 100 });
       const keys: string[] = [];
-      for await (const chunk of stream) keys.push(...(chunk as string[]));
+      for await (const chunk of stream) {
+        keys.push(...(chunk as string[]));
+      }
       if (keys.length) await this.redis.del(...keys);
     }, undefined);
   }
 
+  /**
+   * Rate limit: INCR + EXPIRE në dritare fikse. Nëse Redis dështon, lejon kërkesën.
+   * @returns true nëse kërkesa lejohet, false nëse u tejkalua limiti
+   */
   async checkRateLimit(key: string, windowSec: number, limit: number): Promise<boolean> {
     return this.safe(async () => {
       const n = await this.redis.incr(key);
@@ -59,6 +68,10 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    try { await this.redis.quit(); } catch {}
+    try {
+      await this.redis.quit();
+    } catch {
+      // ignore
+    }
   }
 }

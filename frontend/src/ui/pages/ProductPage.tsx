@@ -15,7 +15,7 @@ type ViewProduct = {
   stock: number;
 };
 
-
+// 1:1 strukturë me `LB-Techworks/sproduct.html`; të dhëna demo + API kur ka UUID nga DB.
 export function ProductPage() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -201,7 +201,7 @@ export function ProductPage() {
             disabled={p.stock <= 0}
             onClick={() => {
               addToCart({ id: cartId, name: p.name, price: p.price, image: p.image }, qty);
-
+              // CartPopup auto-hapet nga addToCart
             }}
           >
             Bli tani

@@ -1,5 +1,6 @@
 import { legacyAsset } from '../lib/assets';
 
+/** 1:1 me përmbajtjen kryesore të `LB-Techworks/blog.html` */
 export function BlogPage() {
   const posts = [
     {

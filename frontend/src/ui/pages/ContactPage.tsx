@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { API_BASE } from '../lib/api';
 
+/** 1:1 me `LB-Techworks/contact.html` (seksionet kryesore). */
 export function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

@@ -6,7 +6,7 @@ import { App } from './ui/App';
 import './ui/legacy.css';
 import { useAuthStore } from './ui/store/authStore';
 
-
+// Auto-logout kur JWT skadron (401 Unauthorized)
 axios.interceptors.response.use(
   (res) => res,
   (error: { response?: { status?: number }; config?: { _retry?: boolean } }) => {

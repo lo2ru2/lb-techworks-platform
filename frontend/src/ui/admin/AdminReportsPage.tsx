@@ -48,7 +48,7 @@ export function AdminReportsPage() {
 
   useEffect(() => {
     load();
-   
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ngarkim fillestar
   }, []);
 
   async function exportFmt(fmt: 'csv' | 'json' | 'xlsx') {
@@ -120,7 +120,7 @@ export function AdminReportsPage() {
         <div className="admin-card">
           <h2>Përmbledhje</h2>
           <p>
-            <strong>Porosi:</strong> {data.totalOrders} · <strong>Totali (cent):</strong> {data.totalRevenueCents}
+            <strong>Porosi:</strong> {data.totalOrders} · <strong>Totali:</strong> {(data.totalRevenueCents / 100).toFixed(2)} €
           </p>
           {data.filterSummary && (
             <p style={{ fontSize: 13, color: '#64748b' }}>Filtra: {data.filterSummary}</p>
@@ -130,7 +130,7 @@ export function AdminReportsPage() {
               <tr>
                 <th>Statusi</th>
                 <th>Numri</th>
-                <th>Totali (cent)</th>
+                <th>Totali (€)</th>
               </tr>
             </thead>
             <tbody>
@@ -138,7 +138,7 @@ export function AdminReportsPage() {
                 <tr key={k}>
                   <td>{k}</td>
                   <td>{v.count}</td>
-                  <td>{v.totalCents}</td>
+                  <td>{(v.totalCents / 100).toFixed(2)} €</td>
                 </tr>
               ))}
             </tbody>
