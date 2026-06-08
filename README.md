@@ -252,7 +252,7 @@ Lejet (permissions) ruhen në databazë dhe verifikohen përmes `PermissionGuard
 
 ## Dokumentimi shtesë
 
-- [Diagrami ERD](docs/erd.mmd) — struktura e databazës
+- [Diagrami ERD (Mermaid, burimor)](docs/erd.mmd) · [ERD i vizualizuar (HTML)](docs/erd.html) — struktura e databazës
 - [Postman Collection](docs/postman-collection.json) — importo dhe vendos `baseUrl = http://localhost:3001`
 - [Project Management](docs/PROJECT_MANAGEMENT.md) — plani i punës ditë-për-ditë
 - [Trello Board](https://trello.com/b/JHEdVnAO/lb-techworks-platform) — gjurmimi i task-eve të ekipit
