@@ -15,11 +15,9 @@ type LegacyProductRow = {
   stock: number;
 };
 
-const apiBase = (process.env.API_PUBLIC_URL ?? 'http://localhost:3001').replace(/\/$/, '');
-
 function imgUrl(relativeFromLegacyRoot: string) {
   const clean = relativeFromLegacyRoot.replace(/^\/+/, '');
-  return `${apiBase}/shop-assets/${clean}`;
+  return `/shop-assets/${clean}`;
 }
 
 async function main() {
