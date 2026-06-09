@@ -5,7 +5,6 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import helmet from 'helmet';
-import { join } from 'path';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './modules/app/app.module';
 
@@ -16,12 +15,6 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   const corsOrigin = config.get<string>('BACKEND_CORS_ORIGIN') ?? 'http://localhost:5173';
-
-  // `nest build` → `dist/src/main.js`, pra __dirname = `backend/dist/src`. 4× `..` = prindi i monorepos (`.../LB-Techworks` + `lb-techworks-platform`), pastaj `LB-Techworks` = vëllai me `img/`.
-  const legacyRoot =
-    config.get<string>('LEGACY_ASSETS_ROOT')?.trim() ||
-    join(__dirname, '..', '..', '..', '..', 'LB-Techworks');
-  app.use('/shop-assets', express.static(legacyRoot));
 
   app.use(
     helmet({

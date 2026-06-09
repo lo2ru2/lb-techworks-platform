@@ -132,9 +132,6 @@ GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
 # Stripe (opsional — testim pagesash)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=
-
-# Shtegu i imazheve legacy (opsional)
-LEGACY_ASSETS_ROOT=
 ```
 
 ### 5. Apliko migrimet e databazës
@@ -253,6 +250,7 @@ Lejet (permissions) ruhen në databazë dhe verifikohen përmes `PermissionGuard
 ## Dokumentimi shtesë
 
 - [Diagrami ERD (Mermaid, burimor)](docs/erd.mmd) · [ERD i vizualizuar (HTML)](docs/erd.html) — struktura e databazës
+- [Udhëzues migrimi NestJS → Express.js](docs/EXPRESS_MIGRATION_GUIDE.md) — plani i konvertimit të backend-it sipas Stack #1 (MERN), ndarë sipas anëtarëve
 - [Postman Collection](docs/postman-collection.json) — importo dhe vendos `baseUrl = http://localhost:3001`
 - [Project Management](docs/PROJECT_MANAGEMENT.md) — plani i punës ditë-për-ditë
 - [Trello Board](https://trello.com/b/JHEdVnAO/lb-techworks-platform) — gjurmimi i task-eve të ekipit
