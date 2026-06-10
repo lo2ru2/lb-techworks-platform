@@ -80,12 +80,12 @@ async function main() {
     if (!existingMP) await prisma.rolePermission.create({ data: { roleId: managerRole.id, permissionId: p.id } });
   }
 
-  const passwordHash = await bcrypt.hash('Admin123!', 12);
+  const passwordHash = await bcrypt.hash('admin123', 12);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@lbtechworks.local' },
     update: { fullName: 'Admin LB-Techworks', firstName: 'Admin', lastName: 'LB-Techworks', passwordHash },
     create: {
-      email: 'admin@lbtechworks.local',
+      email: 'admin@lbtechworks.com',
       fullName: 'Admin LB-Techworks',
       firstName: 'Admin',
       lastName: 'LB-Techworks',
