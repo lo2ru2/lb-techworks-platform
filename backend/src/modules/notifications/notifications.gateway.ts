@@ -273,8 +273,9 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     this.server.to('support:admins').emit('notifications:counts', await this.getNotificationCounts());
   }
 
-  private async getSupportSessionsSnapshot(): Promise<SupportSession[]> {
+   private async getSupportSessionsSnapshot(): Promise<SupportSession[]> {
     const sessions = await this.prisma.supportSession.findMany({
+      where: { id: { not: { startsWith: 'contact:' } } },
       include: {
         messages: {
           orderBy: { createdAt: 'asc' },
